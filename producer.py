@@ -41,7 +41,7 @@ async def retry_if_connection_fails(retries: int, delay: int):
             channel: aio_pika.channel.Channel = await connection.channel()
 
             # send a ramdom number of predefined messages to given conenction
-            emit_amqp_messages(channel)
+            await emit_amqp_messages(channel)
 
             # close connection
             await connection.close()
@@ -60,4 +60,4 @@ async def retry_if_connection_fails(retries: int, delay: int):
 
 
 if __name__ == "__main__":
-    asyncio.run(retry_if_connection_fails())
+    asyncio.run(retry_if_connection_fails(20, 0.5))
