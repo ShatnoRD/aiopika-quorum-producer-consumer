@@ -28,8 +28,8 @@ async def emit(channel: aio_pika.channel.Channel, route: str, data: dict):
 
 async def emit_amqp_messages(channel: aio_pika.channel.Channel):
     for topic in BINDING_KEYS:
-        for _ in range(randint(1, 5)):
-            await emit(channel, topic, f"payload sent for topic[{topic}]")
+        for num in range(randint(1, 5)):
+            await emit(channel, topic, f"{num+1}# payload sent with topic[{topic}]")
 
 
 async def retry_if_connection_fails(retries: int, delay: int):
@@ -60,4 +60,5 @@ async def retry_if_connection_fails(retries: int, delay: int):
 
 
 if __name__ == "__main__":
-    asyncio.run(retry_if_connection_fails(20, 0.5))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(retry_if_connection_fails(20, 0.5))

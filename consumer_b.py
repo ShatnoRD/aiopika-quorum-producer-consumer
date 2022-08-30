@@ -12,7 +12,8 @@ QUEUE_NAME = "consumer_b"
 
 
 async def receive_amqp_messages():
-    print("Connecting to message")
+    # connect to server
+
     connection: aio_pika.robust_connection.RobustConnection = await aio_pika.connect_robust(AMQP_ADDRESS)
     async with connection:
         channel: aio_pika.channel.Channel = await connection.channel()
@@ -28,7 +29,7 @@ async def receive_amqp_messages():
         queue: aio_pika.queue.Queue = await channel.declare_queue(
             QUEUE_NAME,
             durable=True,
-            # arguments={"x-queue-type": "quorum"},
+            arguments={"x-queue-type": "quorum", "x-single-active-consumer": True},
         )
 
         # binding queue to exchange
@@ -39,8 +40,10 @@ async def receive_amqp_messages():
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 async with message.process():
-                    print("Message body is: %r" % message.body)
+                    payload = message.body.decode("utf-8")
+                    print(f"Message body is:{payload}")
 
 
 if __name__ == "__main__":
-    asyncio.run(receive_amqp_messages())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(receive_amqp_messages())
